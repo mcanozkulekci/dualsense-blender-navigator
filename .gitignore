@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+dist/
+test-output/
+.test-profile/
+*.blend
+*.blend1
+*.log
+*.pid
+.env
+.env.*
+Thumbs.db
+desktop.ini

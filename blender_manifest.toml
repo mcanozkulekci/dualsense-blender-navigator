@@ -1,0 +1,17 @@
+schema_version = "1.0.0"
+id = "dualsense_navigator"
+version = "1.0.0"
+name = "DualSense Navigator"
+tagline = "Navigate the 3D viewport with a PS5 DualSense controller"
+maintainer = "DualSense Navigator"
+type = "add-on"
+tags = ["3D View"]
+blender_version_min = "4.2.0"
+license = ["SPDX:GPL-3.0-or-later"]
+platforms = ["windows-x64"]
+
+[permissions]
+files = "Read input reports through Windows HID device handles"
+
+[build]
+paths_exclude_pattern = [".*", "__pycache__/", "*.pyc", "dist/", "test-output/", "tests/", "scripts/", "docs/"]
