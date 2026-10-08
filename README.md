@@ -5,7 +5,7 @@ USB ve Bluetooth HID girdilerini doğrudan okur; ek Python paketi veya sürücü
 
 ## Kurulum
 
-1. `dist/dualsense_navigator-1.0.0.zip` paketini oluştur veya sağlanan ZIP'i kullan.
+1. [dualsense_navigator-1.0.0.zip](packages/dualsense_navigator-1.0.0.zip?raw=1) paketini indir.
 2. Blender: **Edit > Preferences > Add-ons > sağ üst menü > Install from Disk**.
 3. ZIP'i seç ve **DualSense Navigator** eklentisini etkinleştir.
 4. Otomatik tercih kaydı kapalıysa **Save Preferences** seç.
@@ -58,7 +58,7 @@ dizinine yönelirse test kayıt yapmadan durur. Sonuçlar `test-output` altında
 
 ## CameraTools incelemesi
 
-[Cyberpunk CameraTools v1.0.44 gamepad incelemesi](docs/cameratools-review.md), eklentiye
+[Cyberpunk CameraTools v1.0.44 gamepad incelemesi](https://github.com/mcanozkulekci/dualsense-blender-navigator/blob/main/docs/cameratools-review.md), eklentiye
 alınabilecek özellikleri ve önceliklerini açıklar. Bu özellikler 1.0.0'a eklenmiş değildir.
 Vendor DLL/EXE veya kaynak kodu bu repoya dahil edilmemiştir.
 

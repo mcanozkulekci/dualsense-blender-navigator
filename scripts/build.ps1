@@ -8,4 +8,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Extension build failed' }
 $packagePath = Join-Path $distDir 'dualsense_navigator-1.0.0.zip'
 & $BlenderExe --background --command extension validate $packagePath
 if ($LASTEXITCODE -ne 0) { throw 'Extension validation failed' }
+$packagesDir = Join-Path $projectRoot 'packages'
+New-Item -ItemType Directory -Path $packagesDir -Force | Out-Null
+Copy-Item -LiteralPath $packagePath -Destination (Join-Path $packagesDir 'dualsense_navigator-1.0.0.zip') -Force
 Write-Output "Package: $packagePath"

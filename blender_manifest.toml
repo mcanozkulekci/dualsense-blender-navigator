@@ -14,4 +14,4 @@ platforms = ["windows-x64"]
 files = "Read input reports through Windows HID device handles"
 
 [build]
-paths_exclude_pattern = [".*", "__pycache__/", "*.pyc", "dist/", "test-output/", "tests/", "scripts/", "docs/"]
+paths_exclude_pattern = [".*", "__pycache__/", "*.pyc", "dist/", "packages/", "test-output/", "tests/", "scripts/", "docs/"]
