@@ -22,7 +22,7 @@ try:
     repo = prefs.extensions.repos.new(name='DualSense Package Test', module='dualsense_test',
                                      custom_directory=str(repo_dir))
     assert bpy.ops.extensions.package_install_files(repo=repo.module,
-        filepath=str(root/'dist'/'dualsense_navigator-1.0.0.zip'), enable_on_install=True) == {'FINISHED'}
+        filepath=str(root/'dist'/'dualsense_navigator-1.0.1.zip'), enable_on_install=True) == {'FINISHED'}
     assert module_name in prefs.addons and hasattr(bpy.types, 'VIEW3D_PT_dualsense')
     result['checks'].append('Extension ZIP installed and enabled')
     module = importlib.import_module(module_name)

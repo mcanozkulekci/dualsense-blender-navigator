@@ -1,6 +1,6 @@
 schema_version = "1.0.0"
 id = "dualsense_navigator"
-version = "1.0.0"
+version = "1.0.1"
 name = "DualSense Navigator"
 tagline = "Navigate the 3D viewport with a PS5 DualSense controller"
 maintainer = "DualSense Navigator"

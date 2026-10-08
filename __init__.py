@@ -136,7 +136,7 @@ class WindowsHID:
         self.bluetooth = False
         self.last_received = 0.0
         self.state = PadState()
-        self.status = "Controller bekleniyor"
+        self.status = "Waiting for controller"
         self.next_scan = 0.0
 
     def devices(self):
@@ -194,7 +194,7 @@ class WindowsHID:
         for path, size, product in self.devices():
             handle = self.k.CreateFileW(path, 0x80000000, 3, None, 3, 0x40000000, None)
             if handle == C.c_void_p(-1).value:
-                self.status = "DualSense acilamadi: Steam Input / HidHide ayarini kontrol et"
+                self.status = "Cannot open DualSense: check Steam Input / HidHide"
                 continue
             self.handle = handle
             self.event = self.k.CreateEventW(None, True, False, None)
@@ -207,7 +207,7 @@ class WindowsHID:
             self.buffer = C.create_string_buffer(size)
             self.bluetooth = size > 64
             self.last_received = time.monotonic()
-            self.status = "DualSense baglandi, veri bekleniyor"
+            self.status = "DualSense connected; waiting for input"
             return True
         return False
 
@@ -242,14 +242,14 @@ class WindowsHID:
                     self.last_received = now
                     self.status = "DualSense - " + state.transport
             if now - self.last_received > 0.5:
-                self.status = "Veri yok - hareket duraklatildi"
+                self.status = "No input - navigation paused"
                 if now - self.last_received > 3.0:
                     self.close()
                 return PadState()
             return self.state
         except OSError:
             self.close()
-            self.status = "Baglanti kesildi - yeniden baglaniliyor"
+            self.status = "Disconnected - reconnecting"
             return PadState()
 
     def close(self):
@@ -286,18 +286,18 @@ if bpy:
         return Matrix((right, up, -forward)).transposed().to_quaternion()
 
     class DualSenseSettings(bpy.types.PropertyGroup):
-        speed: FloatProperty(name="Hiz (birim/sn)", default=3.0, min=0.01, max=1000)
-        look_speed: FloatProperty(name="Bakis (derece/sn)", default=100.0, min=5, max=360)
+        speed: FloatProperty(name="Speed (units/s)", default=3.0, min=0.01, max=1000)
+        look_speed: FloatProperty(name="Look speed (degrees/s)", default=100.0, min=5, max=360)
         deadzone: FloatProperty(name="Deadzone", default=0.15, min=0.02, max=0.8)
-        invert_y: BoolProperty(name="Dikey bakisi ters cevir", default=False)
-        walk: BoolProperty(name="Yatay hareket (yuruyus)", default=True,
-                           description="Sol cubukla duzlemde hareket; kapaliyken bakis yonunde ucus. Yercekimi/carpisma yok")
-        status: StringProperty(default="Hazir")
+        invert_y: BoolProperty(name="Invert vertical look", default=False)
+        walk: BoolProperty(name="Horizontal movement (walk)", default=True,
+                           description="Move horizontally with the left stick; disable to fly along the viewing direction. No gravity or collisions")
+        status: StringProperty(default="Ready")
 
     class VIEW3D_OT_dualsense_navigate(bpy.types.Operator):
         bl_idname = "view3d.dualsense_navigate"
-        bl_label = "DualSense ile gezin"
-        bl_description = "DualSense gezinmesini baslat; Options veya Esc ile durdur"
+        bl_label = "Start Navigation"
+        bl_description = "Start DualSense navigation; press Options or Esc to stop"
         _timer = None
         _pad = None
         _finished = False
@@ -305,13 +305,13 @@ if bpy:
         def invoke(self, context, event):
             global _active
             if _active is not None:
-                self.report({'WARNING'}, "DualSense zaten calisiyor")
+                self.report({'WARNING'}, "DualSense navigation is already running")
                 return {'CANCELLED'}
             if context.area.type != 'VIEW_3D' or not context.space_data.region_3d:
-                self.report({'ERROR'}, "Bir 3D View icinde baslat")
+                self.report({'ERROR'}, "Start from a 3D View")
                 return {'CANCELLED'}
             if context.space_data.region_quadviews:
-                self.report({'ERROR'}, "Once Quad View modundan cik (Ctrl+Alt+Q)")
+                self.report({'ERROR'}, "Exit Quad View first (Ctrl+Alt+Q)")
                 return {'CANCELLED'}
             self._area, self._window = context.area, context.window
             self._space, self._rv = context.space_data, context.space_data.region_3d
@@ -338,7 +338,7 @@ if bpy:
                 return {'CANCELLED'}
             self._last = time.monotonic()
             _active = self
-            self._settings.status = "Controller bekleniyor"
+            self._settings.status = "Waiting for controller"
             return {'RUNNING_MODAL'}
 
         def modal(self, context, event):
@@ -369,7 +369,7 @@ if bpy:
                 under_mouse = self._area.x <= event.mouse_x < self._area.x + self._area.width and self._area.y <= event.mouse_y < self._area.y + self._area.height
                 if not focused or not under_mouse or self._area.regions[:] == []:
                     self._previous = state.buttons
-                    self._settings.status = "Duraklatildi - fareyi 3D View'e getir"
+                    self._settings.status = "Paused - move the pointer into the 3D View"
                     self._area.tag_redraw()
                     return {'PASS_THROUGH'}
                 pressed = state.buttons - self._previous
@@ -388,10 +388,10 @@ if bpy:
                 if "circle" in pressed:
                     self.finish(restore=True)
                     return {'FINISHED'}
-                self._settings.status = self._pad.status + (" | Beklemede (X)" if self._paused else "")
+                self._settings.status = self._pad.status + (" | Paused (Cross)" if self._paused else "")
                 if not self._paused:
                     self.step(state, dt)
-                self._area.header_text_set("DualSense | Sol: hareket | Sag: bakis | L2/R2: yukseklik | X: duraklat | Options/Esc: bitir")
+                self._area.header_text_set("DualSense | Left: move | Right: look | L2/R2: down/up | Cross: pause | Options/Esc: stop")
                 self._area.tag_redraw()
                 return {'PASS_THROUGH'}
             except Exception as exc:
@@ -437,7 +437,7 @@ if bpy:
                     self._rv.view_location, self._rv.view_rotation, self._rv.view_distance, self._rv.view_perspective = self._original
                 self._area.header_text_set(None)
                 self._area.tag_redraw()
-                self._settings.status = "Durduruldu"
+                self._settings.status = "Stopped"
             except (ReferenceError, AttributeError):
                 pass
             _active = None
@@ -447,7 +447,7 @@ if bpy:
 
     class VIEW3D_OT_dualsense_stop(bpy.types.Operator):
         bl_idname = "view3d.dualsense_stop"
-        bl_label = "Gezinmeyi durdur"
+        bl_label = "Stop Navigation"
 
         def execute(self, context):
             if _active:
@@ -472,9 +472,9 @@ if bpy:
             for name in ("speed", "look_speed", "deadzone", "walk", "invert_y"):
                 layout.prop(settings, name)
             box = layout.box()
-            for line in ("Sol cubuk: ileri/geri, saga/sola", "Sag cubuk: etrafa bak", "L2 / R2: alcal / yuksel",
-                         "L1: hassas | R1: hizli", "D-pad yukari/asagi: hiz +/-", "X: duraklat | Ucgen: yuru/uc",
-                         "Options / Esc: bitir", "Daire: baslangica don ve bitir", "Fare 3D View icindeyken aktif", "Yercekimi ve carpisma yok"):
+            for line in ("Left stick: move and strafe", "Right stick: look around", "L2 / R2: down / up",
+                         "L1: precision | R1: fast", "D-pad up/down: speed +/-", "Cross: pause | Triangle: walk/fly",
+                         "Options / Esc: stop", "Circle: restore starting view and stop", "Active while the pointer is in the 3D View", "No gravity or collision detection"):
                 box.label(text=line)
 
     CLASSES = (DualSenseSettings, VIEW3D_OT_dualsense_navigate, VIEW3D_OT_dualsense_stop, VIEW3D_PT_dualsense)
