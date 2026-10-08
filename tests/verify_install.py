@@ -4,6 +4,7 @@ import bpy
 import importlib
 import json
 import sys
+import tomllib
 
 root = Path(__file__).resolve().parent.parent
 output = root/'test-output'
@@ -13,6 +14,7 @@ actual_config = Path(bpy.utils.user_resource('CONFIG')).resolve()
 assert actual_config == expected_config, f'Refusing preference write outside test profile: {actual_config}'
 assert expected_config.is_dir()
 module_name = 'bl_ext.dualsense_test.dualsense_navigator'
+version = tomllib.loads((root/'blender_manifest.toml').read_text())['version']
 result = {'blender': bpy.app.version_string, 'checks': [], 'isolated_config': True}
 try:
     prefs = bpy.context.preferences
@@ -22,7 +24,7 @@ try:
     repo = prefs.extensions.repos.new(name='DualSense Package Test', module='dualsense_test',
                                      custom_directory=str(repo_dir))
     assert bpy.ops.extensions.package_install_files(repo=repo.module,
-        filepath=str(root/'dist'/'dualsense_navigator-1.0.1.zip'), enable_on_install=True) == {'FINISHED'}
+        filepath=str(root/'dist'/f'dualsense_navigator-{version}.zip'), enable_on_install=True) == {'FINISHED'}
     assert module_name in prefs.addons and hasattr(bpy.types, 'VIEW3D_PT_dualsense')
     result['checks'].append('Extension ZIP installed and enabled')
     module = importlib.import_module(module_name)
@@ -32,7 +34,7 @@ try:
     finally:
         reader.close()
     bpy.ops.preferences.addon_disable(module=module_name)
-    assert not hasattr(bpy.types.WindowManager, 'dualsense_nav')
+    assert not hasattr(bpy.types.Scene, 'dualsense_nav')
     result['checks'].append('Disable removes registered properties')
     bpy.ops.preferences.addon_enable(module=module_name)
     assert hasattr(bpy.types, 'VIEW3D_PT_dualsense')

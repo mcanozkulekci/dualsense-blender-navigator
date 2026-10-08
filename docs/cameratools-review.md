@@ -1,5 +1,12 @@
 # Cyberpunk CameraTools v1.0.44: gamepad review
 
+Historical review written for extension 1.0.0. Version 1.1.0 independently implements
+smoothing, configurable button bindings and a cinematic preset, trigger swapping,
+FOV/roll resets, saved positions, path preview, live recording and camera keyframe
+baking. Stick swapping, vertical speed multipliers, spline/constant-speed paths,
+shake and timeline controls remain ideas. References to the "current" extension
+below describe the original 1.0.0 behavior.
+
 Reviewed on 2026-10-09 using the local package's `Readme.txt`, `IGCSClientSettings.ini`
 and static UI labels from the client executable. No EXE/DLL was executed or injected
 into the game, and no CameraTools settings were changed. This review considers
@@ -95,7 +102,8 @@ Local file SHA256 values; vendor files are not distributed here:
 Official documentation may describe newer versions. Claims about the installed
 v1.0.44 package are limited by the local configuration and changelog. The proposed
 Blender features are implementation ideas, not transferred CameraTools source code,
-and have not been implemented in the extension.
+and are not a transfer of vendor implementation. See the version note above for
+the features implemented independently in 1.1.0.
 
 - [General configuration and controls](https://opm.fransbouma.com/generalconfiguration.htm)
 - [Camera paths](https://opm.fransbouma.com/camerapaths.htm)
